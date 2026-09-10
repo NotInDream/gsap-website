@@ -25,57 +25,76 @@ export const TitleSection = () => {
       gsap.set(adamRef.current, { transformOrigin: "left bottom" });
       gsap.set(zeusRef.current, { transformOrigin: "right top" });
 
-      // Float idle: ayunan rotasi halus bolak-balik (durasi beda biar tak sinkron).
-      gsap.fromTo(
-        adamRef.current,
-        { rotation: -2.5 },
-        {
+      let onMove: ((e: MouseEvent) => void) | undefined;
+
+      const startAmbient = () => {
+        // Float idle: ayunan rotasi halus dari posisi diam (0) → tanpa lompatan.
+        gsap.to(adamRef.current, {
           rotation: 3.5,
           duration: 1.25,
           ease: "sine.inOut",
           yoyo: true,
           repeat: -1,
-        },
-      );
-      gsap.fromTo(
-        zeusRef.current,
-        { rotation: 2.5 },
-        {
+        });
+        gsap.to(zeusRef.current, {
           rotation: -3.5,
-          duration: 1.75,
+          duration: 1.5,
           ease: "sine.inOut",
           yoyo: true,
           repeat: -1,
-        },
-      );
-
-      // Parallax kursor. factor positif = searah kursor (background),
-      // negatif = berlawanan (objek depan). Makin besar |factor|, makin "depan".
-      const layers = [
-        { el: bgRef.current, factor: 30 },
-        { el: textRef.current, factor: -25 },
-        { el: adamRef.current, factor: -55 },
-        { el: zeusRef.current, factor: -55 },
-        { el: ayaRef.current, factor: -85 },
-      ].map(({ el, factor }) => ({
-        factor,
-        x: gsap.quickTo(el, "x", { duration: 0.8, ease: "power3.out" }),
-        y: gsap.quickTo(el, "y", { duration: 0.8, ease: "power3.out" }),
-      }));
-
-      const onMove = (e: MouseEvent) => {
-        const r = root.current!.getBoundingClientRect();
-        const nx = (e.clientX - r.left) / r.width - 0.5; // -0.5..0.5
-        const ny = (e.clientY - r.top) / r.height - 0.5;
-        layers.forEach(({ x, y, factor }) => {
-          x(nx * factor);
-          y(ny * factor);
         });
+
+        // Parallax kursor. factor positif = searah kursor (background),
+        // negatif = berlawanan (objek depan). Makin besar |factor|, makin "depan".
+        const layers = [
+          { el: bgRef.current, factor: 30 },
+          { el: textRef.current, factor: -25 },
+          { el: adamRef.current, factor: -55 },
+          { el: zeusRef.current, factor: -55 },
+          { el: ayaRef.current, factor: -85 },
+        ].map(({ el, factor }) => ({
+          factor,
+          x: gsap.quickTo(el, "x", { duration: 0.8, ease: "power3.out" }),
+          y: gsap.quickTo(el, "y", { duration: 0.8, ease: "power3.out" }),
+        }));
+
+        onMove = (e: MouseEvent) => {
+          const r = root.current!.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width - 0.5; // -0.5..0.5
+          const ny = (e.clientY - r.top) / r.height - 0.5;
+          layers.forEach(({ x, y, factor }) => {
+            x(nx * factor);
+            y(ny * factor);
+          });
+        };
+        root.current!.addEventListener("mousemove", onMove);
       };
 
-      const el = root.current!;
-      el.addEventListener("mousemove", onMove);
-      return () => el.removeEventListener("mousemove", onMove);
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+        onComplete: startAmbient,
+      });
+
+      tl.from(textRef.current, { y: -140, autoAlpha: 0, duration: 1 }, 0.4)
+        .from(
+          adamRef.current,
+          { x: -520, rotation: -22, autoAlpha: 0, duration: 1.1 },
+          "-=0.35",
+        )
+        .from(
+          zeusRef.current,
+          { x: 520, rotation: 22, autoAlpha: 0, duration: 1.1 },
+          "<",
+        )
+        .from(
+          ayaRef.current,
+          { yPercent: 100, autoAlpha: 0, duration: 1.1 },
+          "<",
+        );
+
+      return () => {
+        if (onMove) root.current?.removeEventListener("mousemove", onMove);
+      };
     },
     { scope: root },
   );
