@@ -13,19 +13,44 @@ export const TitleSection = () => {
   const bgRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const ayaRef = useRef<HTMLImageElement>(null);
-  const adamRef = useRef<HTMLImageElement>(null);
-  const zeusRef = useRef<HTMLImageElement>(null);
+  const adamRef = useRef<HTMLDivElement>(null);
+  const zeusRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      // Rotasi tangan dipegang GSAP supaya tidak bentrok dengan animasi x/y.
-      gsap.set(adamRef.current, { rotate: -15.47 });
-      gsap.set(zeusRef.current, { rotate: 5.08 });
       // Background dibesarkan sedikit agar ada ruang saat digeser (tepi tak bolong).
       gsap.set(bgRef.current, { scale: 1.12 });
 
-      // factor positif = searah kursor (background), negatif = berlawanan (objek depan).
-      // makin besar |factor|, makin banyak bergerak → makin terasa "depan".
+      // Pivot tiap tangan di sudut yang menempel → ujung bebasnya yang naik-turun.
+      gsap.set(adamRef.current, { transformOrigin: "left bottom" });
+      gsap.set(zeusRef.current, { transformOrigin: "right top" });
+
+      // Float idle: ayunan rotasi halus bolak-balik (durasi beda biar tak sinkron).
+      gsap.fromTo(
+        adamRef.current,
+        { rotation: -2.5 },
+        {
+          rotation: 3.5,
+          duration: 1.25,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        },
+      );
+      gsap.fromTo(
+        zeusRef.current,
+        { rotation: 2.5 },
+        {
+          rotation: -3.5,
+          duration: 1.75,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        },
+      );
+
+      // Parallax kursor. factor positif = searah kursor (background),
+      // negatif = berlawanan (objek depan). Makin besar |factor|, makin "depan".
       const layers = [
         { el: bgRef.current, factor: 30 },
         { el: textRef.current, factor: -25 },
@@ -52,7 +77,7 @@ export const TitleSection = () => {
       el.addEventListener("mousemove", onMove);
       return () => el.removeEventListener("mousemove", onMove);
     },
-    { scope: root }
+    { scope: root },
   );
 
   return (
@@ -77,7 +102,8 @@ export const TitleSection = () => {
         >
           {/* Title */}
           <h1 className="font-cormorant font-medium text-6xl tracking-[-0.01em]">
-            <span className={capital}>M</span>y <span className={capital}>B</span>
+            <span className={capital}>M</span>y{" "}
+            <span className={capital}>B</span>
             ini <span className={capital}>G</span>weh
           </h1>
 
@@ -98,18 +124,22 @@ export const TitleSection = () => {
           alt=""
           className="absolute z-30 -bottom-8.75 right-177.5 w-126.75"
         />
-        <img
+
+        {/* Tangan kiri — pivot bottom-left */}
+        <div
           ref={adamRef}
-          src={adamHand}
-          alt=""
           className="absolute z-20 bottom-[46.78px] -left-21.5 w-[591.07px]"
-        />
-        <img
+        >
+          <img src={adamHand} alt="" className="w-full rotate-[-15.47deg]" />
+        </div>
+
+        {/* Tangan kanan — pivot top-right */}
+        <div
           ref={zeusRef}
-          src={zeusHand}
-          alt=""
           className="absolute z-20 bottom-[99.33px] right-[-26.2px] w-[542.21px]"
-        />
+        >
+          <img src={zeusHand} alt="" className="w-full rotate-[5.08deg]" />
+        </div>
       </div>
     </div>
   );
