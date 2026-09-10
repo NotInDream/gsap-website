@@ -18,16 +18,28 @@ export const TitleSection = () => {
 
   useGSAP(
     () => {
+      // Setup statis (berlaku di semua kondisi).
       // Background dibesarkan sedikit agar ada ruang saat digeser (tepi tak bolong).
       gsap.set(bgRef.current, { scale: 1.12 });
-
       // Pivot tiap tangan di sudut yang menempel → ujung bebasnya yang naik-turun.
       gsap.set(adamRef.current, { transformOrigin: "left bottom" });
       gsap.set(zeusRef.current, { transformOrigin: "right top" });
 
-      let onMove: ((e: MouseEvent) => void) | undefined;
+      const mm = gsap.matchMedia();
 
-      const startAmbient = () => {
+      // Hormati "reduce motion": tampilkan langsung tanpa animasi.
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(
+          [textRef.current, ayaRef.current, adamRef.current, zeusRef.current],
+          { autoAlpha: 1, x: 0, y: 0, rotation: 0 },
+        );
+      });
+
+      // Animasi penuh hanya bila user tidak meminta reduce motion.
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        let onMove: ((e: MouseEvent) => void) | undefined;
+
+        const startAmbient = () => {
         // Float idle: ayunan rotasi halus dari posisi diam (0) → tanpa lompatan.
         gsap.to(adamRef.current, {
           rotation: 3.5,
@@ -92,9 +104,12 @@ export const TitleSection = () => {
           "<",
         );
 
-      return () => {
-        if (onMove) root.current?.removeEventListener("mousemove", onMove);
-      };
+        return () => {
+          if (onMove) root.current?.removeEventListener("mousemove", onMove);
+        };
+      });
+
+      return () => mm.revert();
     },
     { scope: root },
   );
