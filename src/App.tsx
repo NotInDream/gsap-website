@@ -1,3 +1,4 @@
+import { ReasoningSection } from "./components/organisms/ReasoningSection";
 import { TitleSection } from "./components/organisms/TitleSection";
 
 function App() {
@@ -5,6 +6,7 @@ function App() {
     <>
       <div className="w-full h-screen rounded-full">
         <TitleSection />
+        <ReasoningSection />
       </div>
     </>
   );
