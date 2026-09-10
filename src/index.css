@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@fontsource/cormorant-garamond";
+@import "@fontsource/kapakana";
+
+@theme {
+  --font-cormorant: "Cormorant Garamond", serif;
+  --font-kapakana: "Kapakana", cursive;
+}
