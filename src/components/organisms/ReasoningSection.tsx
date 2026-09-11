@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import background from "../../assets/backgrounds/background-2.jpg";
@@ -11,7 +6,10 @@ import polaroid1 from "../../assets/foregrounds/section-2/polaroid-1.jpeg";
 import polaroid2 from "../../assets/foregrounds/section-2/polaroid-2.jpeg";
 import polaroid3 from "../../assets/foregrounds/section-2/polaroid-3.jpeg";
 import polaroid4 from "../../assets/foregrounds/section-2/polaroid-4.jpeg";
-import { PolaroidDeck, type PolaroidDeckHandle } from "../molecules/PolaroidDeck";
+import {
+  PolaroidDeck,
+  type PolaroidDeckHandle,
+} from "../molecules/PolaroidDeck";
 
 // Ganti nama caption tiap polaroid di sini.
 const photos = [
@@ -48,10 +46,24 @@ export type ReasoningSectionHandle = {
 export const ReasoningSection = forwardRef<ReasoningSectionHandle>(
   (_props, ref) => {
     const root = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
     const deckRef = useRef<PolaroidDeckHandle>(null);
-    const current = useRef(0);
-    const [active, setActive] = useState(0);
+    const subs = useRef<(HTMLHeadingElement | null)[]>([]);
+
+    // Tiap subtitle terikat ke polaroid ke-i lewat `rel` yang SAMA dengan deck,
+    // jadi siklus pergantian teks identik dengan siklus pergantian polaroid:
+    // teks depan keluar ke kiri (mengikuti kartu), teks berikutnya datang dari kanan.
+    const applyText = (p: number) => {
+      subs.current.forEach((el, i) => {
+        if (!el) return;
+        const rel = i - p; // 0 = terdepan, <0 keluar kiri, >0 menunggu di kanan
+        const dist = Math.abs(rel);
+        gsap.set(el, {
+          // Hanya yang terdepan yang terbaca; kurva tajam agar tak tumpang tindih.
+          autoAlpha: gsap.utils.clamp(0, 1, (0.5 - dist) / 0.14),
+          x: rel * 200, // searah kartu: keluar kiri (rel<0), datang dari kanan (rel>0)
+        });
+      });
+    };
 
     // App yang mengendalikan progres (via pin + scrub di master-timeline).
     useImperativeHandle(
@@ -59,29 +71,14 @@ export const ReasoningSection = forwardRef<ReasoningSectionHandle>(
       () => ({
         setProgress: (p) => {
           deckRef.current?.setProgress(p);
-          const idx = Math.round(p);
-          if (idx !== current.current) {
-            current.current = idx;
-            setActive(idx);
-          }
+          applyText(p);
         },
       }),
       [],
     );
 
-    // Swap teks tiap kali `active` berubah.
-    useGSAP(
-      () => {
-        gsap.fromTo(
-          textRef.current,
-          { autoAlpha: 0, y: 30 },
-          { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" },
-        );
-      },
-      { dependencies: [active], scope: root },
-    );
-
-    const reason = reasons[active];
+    // Posisi awal (sebelum di-scrub): hanya subtitle pertama yang tampil.
+    useGSAP(() => applyText(0), { scope: root });
 
     return (
       <div
@@ -105,18 +102,26 @@ export const ReasoningSection = forwardRef<ReasoningSectionHandle>(
           />
 
           <div className="absolute z-10 w-257 h-62.25 right-10 top-100">
-            {/* Title (statis) */}
-            <h1 className="font-cormorant font-normal text-[96px] italic">
+            {/* Title (statis) — left-0 sebagai patokan tepi kiri. */}
+            <h1 className="absolute top-0 -left-4 font-cormorant font-normal text-[96px] italic">
               Why I love you? <span className="text-[48px]">(again)</span>
             </h1>
 
-            {/* Subtitle (ganti tiap langkah scroll) */}
-            <h2
-              ref={textRef}
-              className="font-cormorant font-light text-[40px] italic"
-            >
-              {reason.headline} <br />“{reason.quote}”
-            </h2>
+            {/* Subtitle: 4 teks bertumpuk. left-0 SAMA dengan title → sejajar. */}
+            <div className="absolute left-4 top-32 w-full">
+              {reasons.map((r, i) => (
+                <h2
+                  key={i}
+                  ref={(el) => {
+                    subs.current[i] = el;
+                  }}
+                  className="absolute top-0 left-0 w-full font-cormorant font-light text-[40px] italic"
+                >
+                  {r.headline}
+                  <br />“{r.quote}”
+                </h2>
+              ))}
+            </div>
           </div>
         </div>
       </div>

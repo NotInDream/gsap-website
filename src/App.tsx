@@ -57,7 +57,22 @@ function App() {
           start: "top top",
           end: `+=${TOTAL_BEATS * BEAT}`,
           pin: viewport.current,
-          scrub: 0.4, // smoothing tipis: animasi mengikuti scroll dengan gesit
+          scrub: 0.4, // scroll 1:1 terasa nempel
+          // Snap-to polos: saat scroll berhenti di area Reasoning, tersedot ke
+          // polaroid terdekat. Arah scroll dibiarkan natural (tanpa manipulasi).
+          snap: {
+            snapTo: (value) => {
+              const firstPhoto = COVER + HOLD_MID; // beat polaroid pertama
+              const regionStart = COVER; // setelah Title tertutup
+              const regionEnd = firstPhoto + STEPS + HOLD_MID; // sebelum Proposal naik
+              const beat = value * TOTAL_BEATS;
+              if (beat < regionStart || beat > regionEnd) return value;
+              const k = gsap.utils.clamp(0, STEPS, Math.round(beat - firstPhoto));
+              return (firstPhoto + k) / TOTAL_BEATS;
+            },
+            duration: { min: 0.2, max: 0.5 },
+            ease: "power1.inOut",
+          },
         },
       });
 
