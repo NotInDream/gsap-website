@@ -75,21 +75,49 @@ function App() {
         })
         .to({}, { duration: HOLD_MID })
         // Proposal naik menutupi Reasoning; Reasoning jatuh ke belakang.
-        .to(proposalWrap.current, {
-          yPercent: 0,
-          duration: COVER,
-          onComplete: () => proposalApi.current?.reveal(),
-        })
+        .addLabel("proposal")
+        .to(
+          proposalWrap.current,
+          { yPercent: 0, duration: COVER },
+          "proposal",
+        )
         .to(
           reasoningScene.current,
           { scale: RECEDE_SCALE, duration: COVER },
-          "<",
+          "proposal",
         )
         .to(
           reasoningShade.current,
           { opacity: RECEDE_SHADE, duration: COVER },
-          "<",
+          "proposal",
         );
+
+      // Isi Proposal (mawar+cincin & teks) muncul BARENGAN saat panel naik.
+      const targets = proposalApi.current?.revealTargets();
+      if (targets?.img) {
+        // yPercent: -50 menjaga centering vertikal (menggantikan -translate-y-1/2
+        // yang bisa hilang bila tinggi gambar belum ter-load saat GSAP mengukurnya).
+        tl.fromTo(
+          targets.img,
+          { xPercent: -14, yPercent: -50, autoAlpha: 0 },
+          {
+            xPercent: 0,
+            yPercent: -50,
+            autoAlpha: 1,
+            duration: COVER,
+            ease: "power2.out",
+          },
+          "proposal",
+        );
+      }
+      if (targets?.text) {
+        tl.fromTo(
+          targets.text,
+          { y: 48, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: COVER, ease: "power3.out" },
+          "proposal+=0.15",
+        );
+      }
     },
     { scope: root },
   );

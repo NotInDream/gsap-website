@@ -10,8 +10,11 @@ import background from "../../assets/backgrounds/background-3.jpg";
 import flowerRing from "../../assets/foregrounds/section-3/flower-and-ring-cropped.png";
 
 export type ProposalSectionHandle = {
-  /** Dipanggil App saat section ini selesai menutupi section sebelumnya. */
-  reveal: () => void;
+  /** Elemen yang dianimasikan App barengan saat panel Section 3 naik. */
+  revealTargets: () => {
+    img: HTMLElement | null;
+    text: HTMLElement | null;
+  };
 };
 
 export const ProposalSection = forwardRef<ProposalSectionHandle>(
@@ -21,10 +24,9 @@ export const ProposalSection = forwardRef<ProposalSectionHandle>(
     const textRef = useRef<HTMLDivElement>(null);
     const noRef = useRef<HTMLButtonElement>(null);
     const dodges = useRef(0);
-    const revealed = useRef(false);
     const [accepted, setAccepted] = useState(false);
 
-    // Sembunyikan isi dulu; ditampilkan lewat reveal() dari App.
+    // Sembunyikan isi dulu; App yang menganimasikannya barengan saat panel naik.
     useGSAP(
       () => {
         gsap.set([imgRef.current, textRef.current], { autoAlpha: 0 });
@@ -32,27 +34,11 @@ export const ProposalSection = forwardRef<ProposalSectionHandle>(
       { scope: root },
     );
 
-    // Reveal sinematik: gambar masuk dari kiri, teks naik. Sekali saja.
+    // App membaca elemen ini untuk dianimasikan di master-timeline (scrub).
     useImperativeHandle(
       ref,
       () => ({
-        reveal: () => {
-          if (revealed.current) return;
-          revealed.current = true;
-          gsap
-            .timeline({ defaults: { ease: "power3.out" } })
-            .fromTo(
-              imgRef.current,
-              { xPercent: -14, autoAlpha: 0 },
-              { xPercent: 0, autoAlpha: 1, duration: 1.2, ease: "power2.out" },
-            )
-            .fromTo(
-              textRef.current,
-              { y: 48, autoAlpha: 0 },
-              { y: 0, autoAlpha: 1, duration: 0.9 },
-              "-=0.65",
-            );
-        },
+        revealTargets: () => ({ img: imgRef.current, text: textRef.current }),
       }),
       [],
     );
