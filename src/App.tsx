@@ -48,7 +48,8 @@ function App() {
         yPercent: 100,
       });
 
-      const proxy = { p: 0 };
+      let lastIdx = 0; // index polaroid/teks terakhir yang sudah dipicu
+      const firstPhotoBeat = COVER + HOLD_MID; // beat mulai region polaroid
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -57,21 +58,18 @@ function App() {
           start: "top top",
           end: `+=${TOTAL_BEATS * BEAT}`,
           pin: viewport.current,
-          scrub: 0.4, // scroll 1:1 terasa nempel
-          // Snap-to polos: saat scroll berhenti di area Reasoning, tersedot ke
-          // polaroid terdekat. Arah scroll dibiarkan natural (tanpa manipulasi).
-          snap: {
-            snapTo: (value) => {
-              const firstPhoto = COVER + HOLD_MID; // beat polaroid pertama
-              const regionStart = COVER; // setelah Title tertutup
-              const regionEnd = firstPhoto + STEPS + HOLD_MID; // sebelum Proposal naik
-              const beat = value * TOTAL_BEATS;
-              if (beat < regionStart || beat > regionEnd) return value;
-              const k = gsap.utils.clamp(0, STEPS, Math.round(beat - firstPhoto));
-              return (firstPhoto + k) / TOTAL_BEATS;
-            },
-            duration: { min: 0.2, max: 0.5 },
-            ease: "power1.inOut",
+          scrub: 0.4, // scrub halus untuk cover & pan background
+          // Deteksi index dari posisi scroll MENTAH (self.progress), bukan dari
+          // nilai yang ter-smooth scrub → flick cepat langsung lompati ambang
+          // tanpa nunggu smoothing, jadi terasa responsif.
+          onUpdate: (self) => {
+            const beat = self.progress * TOTAL_BEATS;
+            const p = gsap.utils.clamp(0, STEPS, beat - firstPhotoBeat);
+            const idx = Math.round(p);
+            if (idx !== lastIdx) {
+              lastIdx = idx;
+              reasoningApi.current?.playTo(idx);
+            }
           },
         },
       });
@@ -82,12 +80,10 @@ function App() {
         .to(titleScene.current, { scale: RECEDE_SCALE, duration: COVER }, "<")
         .to(titleShade.current, { opacity: RECEDE_SHADE, duration: COVER }, "<")
         .to({}, { duration: HOLD_MID })
-        // 4 polaroid berganti mengikuti scroll.
-        .to(proxy, {
-          p: STEPS,
-          duration: STEPS,
-          onUpdate: () => reasoningApi.current?.setProgress(proxy.p),
-        })
+        // Cadangkan jarak scroll region polaroid; deteksi index & picu playTo
+        // ditangani onUpdate scrollTrigger di atas (dari scroll mentah).
+        .addLabel("photos")
+        .to({}, { duration: STEPS }, "photos")
         .to({}, { duration: HOLD_MID })
         // Proposal naik menutupi Reasoning; Reasoning jatuh ke belakang.
         .addLabel("proposal")
@@ -102,6 +98,18 @@ function App() {
           { opacity: RECEDE_SHADE, duration: COVER },
           "proposal",
         );
+
+      // Background Section 2 diperbesar & di-pan mengikuti scroll (kontinu) selama
+      // region polaroid → memberi umpan balik gerak walau pergantian foto diskrit.
+      const reasoningBg = reasoningApi.current?.bgEl();
+      if (reasoningBg) {
+        tl.fromTo(
+          reasoningBg,
+          { scale: 1.25, yPercent: 7 },
+          { scale: 1.25, yPercent: -7, ease: "none", duration: STEPS },
+          "photos",
+        );
+      }
 
       // Isi Proposal (mawar+cincin & teks) muncul BARENGAN saat panel naik.
       const targets = proposalApi.current?.revealTargets();

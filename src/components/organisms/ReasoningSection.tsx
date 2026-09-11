@@ -34,51 +34,75 @@ const reasons = [
   },
   {
     headline: "Because maybe, we’re worth a sequel.",
-    quote: "The first season was chaotic. Let’s make the second one better.",
+    quote: "The last season was chaotic. Let’s make this one better.",
   },
 ];
 
 export type ReasoningSectionHandle = {
-  /** progress kontinu 0..(REASONING_STEPS-1); dipanggil master-timeline di App. */
-  setProgress: (p: number) => void;
+  /** Animasikan ke state (foto + teks) ke-`index` sekali jalan, tersinkron. */
+  playTo: (index: number) => void;
+  /** Elemen background — di-pan App mengikuti scroll agar terasa hidup. */
+  bgEl: () => HTMLDivElement | null;
+};
+
+// Tata letak tiap subtitle sesuai progress kontinu `p` (0..jumlah-1).
+// Subtitle ke-i terikat ke polaroid ke-i lewat `rel` yang SAMA dengan deck:
+// teks depan keluar ke kiri, teks berikutnya datang dari kanan.
+const layoutText = (els: (HTMLHeadingElement | null)[], p: number) => {
+  els.forEach((el, i) => {
+    if (!el) return;
+    const rel = i - p; // 0 = terdepan, <0 keluar kiri, >0 menunggu di kanan
+    const dist = Math.abs(rel);
+    gsap.set(el, {
+      // Hanya yang terdepan yang terbaca; kurva tajam agar tak tumpang tindih.
+      autoAlpha: gsap.utils.clamp(0, 1, (0.5 - dist) / 0.14),
+      x: rel * 200, // searah kartu: keluar kiri (rel<0), datang dari kanan (rel>0)
+    });
+  });
 };
 
 export const ReasoningSection = forwardRef<ReasoningSectionHandle>(
   (_props, ref) => {
     const root = useRef<HTMLDivElement>(null);
+    const bgRef = useRef<HTMLDivElement>(null);
     const deckRef = useRef<PolaroidDeckHandle>(null);
     const subs = useRef<(HTMLHeadingElement | null)[]>([]);
+    const prog = useRef({ p: 0 }); // progress kontinu internal (0..jumlah-1)
+    const tween = useRef<gsap.core.Tween | null>(null);
 
-    // Tiap subtitle terikat ke polaroid ke-i lewat `rel` yang SAMA dengan deck,
-    // jadi siklus pergantian teks identik dengan siklus pergantian polaroid:
-    // teks depan keluar ke kiri (mengikuti kartu), teks berikutnya datang dari kanan.
-    const applyText = (p: number) => {
-      subs.current.forEach((el, i) => {
-        if (!el) return;
-        const rel = i - p; // 0 = terdepan, <0 keluar kiri, >0 menunggu di kanan
-        const dist = Math.abs(rel);
-        gsap.set(el, {
-          // Hanya yang terdepan yang terbaca; kurva tajam agar tak tumpang tindih.
-          autoAlpha: gsap.utils.clamp(0, 1, (0.5 - dist) / 0.14),
-          x: rel * 200, // searah kartu: keluar kiri (rel<0), datang dari kanan (rel>0)
-        });
-      });
-    };
-
-    // App yang mengendalikan progres (via pin + scrub di master-timeline).
+    // Satu scroll → satu pergantian: animasi AUTOPLAY (bukan scrub) yang
+    // menggerakkan polaroid & teks BERSAMAAN dari state sekarang ke `index`.
     useImperativeHandle(
       ref,
       () => ({
-        setProgress: (p) => {
-          deckRef.current?.setProgress(p);
-          applyText(p);
+        playTo: (index) => {
+          tween.current?.kill();
+          // Durasi ringkas & adaptif: lompatan jauh sedikit lebih lama tapi tetap
+          // dibatasi, ease "power3.out" (mulai cepat) → respons cepat saat flick.
+          const dist = Math.abs(index - prog.current.p);
+          tween.current = gsap.to(prog.current, {
+            p: index,
+            duration: Math.min(0.5, 0.28 + dist * 0.12),
+            ease: "power3.out",
+            onUpdate: () => {
+              deckRef.current?.setProgress(prog.current.p);
+              layoutText(subs.current, prog.current.p);
+            },
+          });
         },
+        bgEl: () => bgRef.current,
       }),
       [],
     );
 
-    // Posisi awal (sebelum di-scrub): hanya subtitle pertama yang tampil.
-    useGSAP(() => applyText(0), { scope: root });
+    // Posisi awal (foto & teks pertama).
+    useGSAP(
+      () => {
+        deckRef.current?.setProgress(0);
+        layoutText(subs.current, 0);
+      },
+      { scope: root },
+    );
 
     return (
       <div
@@ -90,6 +114,7 @@ export const ReasoningSection = forwardRef<ReasoningSectionHandle>(
           style={{ transform: "scale(calc(100cqw / 1920))" }}
         >
           <div
+            ref={bgRef}
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${background})` }}
           />

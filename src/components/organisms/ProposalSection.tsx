@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import background from "../../assets/backgrounds/background-3.jpg";
@@ -146,10 +141,17 @@ export const ProposalSection = forwardRef<ProposalSectionHandle>(
             ) : (
               <>
                 <h1 className="font-cormorant font-normal text-[88px] italic leading-tight">
-                  I knew it.
+                  Lovely.
                 </h1>
                 <p className="mt-4 font-cormorant font-light text-[40px] italic opacity-90">
-                  Season two — let’s make this one better.
+                  Season{" "}
+                  <span className="relative inline-block">
+                    <s className="absolute inset-x-0 bottom-full text-center leading-none opacity-60">
+                      two
+                    </s>
+                    three
+                  </span>{" "}
+                  begin.
                 </p>
               </>
             )}
