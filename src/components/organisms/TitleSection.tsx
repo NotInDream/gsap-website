@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { Stage } from "../atoms/Stage";
 import ayaPaint from "../../assets/foregrounds/section-1/Aya_paint.png";
 import background from "../../assets/backgrounds/background-1.jpg";
 import adamHand from "../../assets/foregrounds/section-1/adam-hand.png";
@@ -115,66 +116,58 @@ export const TitleSection = () => {
   );
 
   return (
-    <div
-      ref={root}
-      className="@container relative w-full aspect-1920/1080 overflow-hidden"
-    >
+    <Stage ref={root}>
       <div
-        className="absolute top-0 left-0 origin-top-left w-[1920px] h-270 overflow-hidden text-white"
-        style={{ transform: "scale(calc(100cqw / 1920))" }}
+        ref={bgRef}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${background})` }}
+      />
+      <div className="absolute inset-0 bg-black/50" />
+
+      <div
+        ref={textRef}
+        className="absolute z-10 w-169 h-62.5 text-center top-72.5 left-155.5"
       >
-        <div
-          ref={bgRef}
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${background})` }}
-        />
-        <div className="absolute inset-0 bg-black/50" />
+        {/* Title */}
+        <h1 className="font-cormorant font-medium text-6xl tracking-[-0.01em]">
+          <span className={capital}>M</span>y{" "}
+          <span className={capital}>B</span>
+          ini <span className={capital}>G</span>weh
+        </h1>
 
-        <div
-          ref={textRef}
-          className="absolute z-10 w-169 h-62.5 text-center top-72.5 left-155.5"
-        >
-          {/* Title */}
-          <h1 className="font-cormorant font-medium text-6xl tracking-[-0.01em]">
-            <span className={capital}>M</span>y{" "}
-            <span className={capital}>B</span>
-            ini <span className={capital}>G</span>weh
-          </h1>
+        {/* Subtitle */}
+        <h2 className="-mt-7.25 font-cormorant font-light text-[40px] italic">
+          (in future I hope...)
+        </h2>
 
-          {/* Subtitle */}
-          <h2 className="-mt-7.25 font-cormorant font-light text-[40px] italic">
-            (in future I hope...)
-          </h2>
-
-          {/* Name */}
-          <h2 className="mt-2.25 font-cormorant font-light text-2xl tracking-wide">
-            Athaya Narani Listya Dewi
-          </h2>
-        </div>
-
-        <img
-          ref={ayaRef}
-          src={ayaPaint}
-          alt=""
-          className="absolute z-30 -bottom-8.75 right-177.5 w-126.75"
-        />
-
-        {/* Tangan kiri — pivot bottom-left */}
-        <div
-          ref={adamRef}
-          className="absolute z-20 bottom-[46.78px] -left-21.5 w-[591.07px]"
-        >
-          <img src={adamHand} alt="" className="w-full rotate-[-15.47deg]" />
-        </div>
-
-        {/* Tangan kanan — pivot top-right */}
-        <div
-          ref={zeusRef}
-          className="absolute z-20 bottom-[99.33px] right-[-26.2px] w-[542.21px]"
-        >
-          <img src={zeusHand} alt="" className="w-full rotate-[5.08deg]" />
-        </div>
+        {/* Name */}
+        <h2 className="mt-2.25 font-cormorant font-light text-2xl tracking-wide">
+          Athaya Narani Listya Dewi
+        </h2>
       </div>
-    </div>
+
+      <img
+        ref={ayaRef}
+        src={ayaPaint}
+        alt=""
+        className="absolute z-30 -bottom-8.75 right-177.5 w-126.75"
+      />
+
+      {/* Tangan kiri — pivot bottom-left */}
+      <div
+        ref={adamRef}
+        className="absolute z-20 bottom-[46.78px] -left-21.5 w-[591.07px]"
+      >
+        <img src={adamHand} alt="" className="w-full rotate-[-15.47deg]" />
+      </div>
+
+      {/* Tangan kanan — pivot top-right */}
+      <div
+        ref={zeusRef}
+        className="absolute z-20 bottom-[99.33px] right-[-26.2px] w-[542.21px]"
+      >
+        <img src={zeusHand} alt="" className="w-full rotate-[5.08deg]" />
+      </div>
+    </Stage>
   );
 };
