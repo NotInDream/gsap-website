@@ -71,6 +71,9 @@ export const ReasoningSection = () => {
           }
         },
       });
+
+      // Hitung ulang posisi pin setelah font (yang mengubah tinggi teks) selesai load.
+      document.fonts?.ready.then(() => ScrollTrigger.refresh());
     },
     { scope: root },
   );

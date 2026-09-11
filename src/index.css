@@ -6,3 +6,12 @@
   --font-cormorant: "Cormorant Garamond", serif;
   --font-kapakana: "Kapakana", cursive;
 }
+
+/* Sembunyikan scrollbar (scroll tetap berfungsi). */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge/IE lama */
+}
+::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
