@@ -157,7 +157,7 @@ function App() {
       >
         {/* Kartu 1 — Title */}
         <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
-          <div ref={titleScene} className="w-full">
+          <div ref={titleScene} className="relative w-full h-full">
             <TitleSection />
           </div>
           <div
@@ -171,7 +171,7 @@ function App() {
           ref={reasoningWrap}
           className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden"
         >
-          <div ref={reasoningScene} className="w-full">
+          <div ref={reasoningScene} className="relative w-full h-full">
             <ReasoningSection ref={reasoningApi} />
           </div>
           <div
@@ -185,7 +185,7 @@ function App() {
           ref={proposalWrap}
           className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden"
         >
-          <div className="w-full">
+          <div className="relative w-full h-full">
             <ProposalSection ref={proposalApi} />
           </div>
         </div>

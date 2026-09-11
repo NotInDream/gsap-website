@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { Stage } from "../atoms/Stage";
 import background from "../../assets/backgrounds/background-3.jpg";
 import flowerRing from "../../assets/foregrounds/section-3/flower-and-ring-cropped.png";
 
@@ -83,81 +84,73 @@ export const ProposalSection = forwardRef<ProposalSectionHandle>(
     );
 
     return (
-      <div
-        ref={root}
-        className="@container relative w-full aspect-1920/1080 overflow-hidden"
-      >
+      <Stage ref={root}>
         <div
-          className="absolute top-0 left-0 origin-top-left w-[1920px] h-270 overflow-hidden text-white"
-          style={{ transform: "scale(calc(100cqw / 1920))" }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${background})` }}
+        />
+        {/* Gelapkan sisi kanan agar teks putih terbaca di atas taman terang. */}
+        <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/35 to-black/10" />
+
+        {/* Mawar, cincin & surat */}
+        <img
+          ref={imgRef}
+          src={flowerRing}
+          alt="A rose, a ring, and a letter"
+          className="absolute z-10 left-24 top-1/2 -translate-y-1/2 w-[560px] rounded-2xl shadow-2xl shadow-black/60"
+        />
+
+        {/* Blok pertanyaan / pesan penutup */}
+        <div
+          ref={textRef}
+          className="absolute z-20 right-30 top-1/2 -translate-y-1/2 w-[820px] text-right"
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${background})` }}
-          />
-          {/* Gelapkan sisi kanan agar teks putih terbaca di atas taman terang. */}
-          <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/35 to-black/10" />
+          {!accepted ? (
+            <>
+              <p className="font-cormorant font-light text-[32px] italic opacity-80">
+                One last question…
+              </p>
+              <h1 className="mt-2 font-cormorant font-normal text-[80px] italic leading-tight">
+                Will you give us <br />a second chance?
+              </h1>
 
-          {/* Mawar, cincin & surat */}
-          <img
-            ref={imgRef}
-            src={flowerRing}
-            alt="A rose, a ring, and a letter"
-            className="absolute z-10 left-24 top-1/2 -translate-y-1/2 w-[560px] rounded-2xl shadow-2xl shadow-black/60"
-          />
-
-          {/* Blok pertanyaan / pesan penutup */}
-          <div
-            ref={textRef}
-            className="absolute z-20 right-30 top-1/2 -translate-y-1/2 w-[820px] text-right"
-          >
-            {!accepted ? (
-              <>
-                <p className="font-cormorant font-light text-[32px] italic opacity-80">
-                  One last question…
-                </p>
-                <h1 className="mt-2 font-cormorant font-normal text-[80px] italic leading-tight">
-                  Will you give us <br />a second chance?
-                </h1>
-
-                <div className="mt-12 flex items-center justify-end gap-8">
-                  <button
-                    onClick={accept}
-                    className="cursor-pointer rounded-full bg-white px-16 py-4 font-cormorant text-[34px] italic text-neutral-900 shadow-xl shadow-black/40 transition-transform hover:scale-105"
-                  >
-                    Yes
-                  </button>
-                  <button
-                    ref={noRef}
-                    onMouseEnter={dodge}
-                    onFocus={dodge}
-                    onClick={dodge}
-                    className="cursor-pointer rounded-full border border-white/70 px-16 py-4 font-cormorant text-[34px] italic text-white/90"
-                  >
-                    No
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h1 className="font-cormorant font-normal text-[88px] italic leading-tight">
-                  Lovely.
-                </h1>
-                <p className="mt-4 font-cormorant font-light text-[40px] italic opacity-90">
-                  Season{" "}
-                  <span className="relative inline-block">
-                    <s className="absolute inset-x-0 bottom-full text-center leading-none opacity-60">
-                      two
-                    </s>
-                    three
-                  </span>{" "}
-                  begin.
-                </p>
-              </>
-            )}
-          </div>
+              <div className="mt-12 flex items-center justify-end gap-8">
+                <button
+                  onClick={accept}
+                  className="cursor-pointer rounded-full bg-white px-16 py-4 font-cormorant text-[34px] italic text-neutral-900 shadow-xl shadow-black/40 transition-transform hover:scale-105"
+                >
+                  Yes
+                </button>
+                <button
+                  ref={noRef}
+                  onMouseEnter={dodge}
+                  onFocus={dodge}
+                  onClick={dodge}
+                  className="cursor-pointer rounded-full border border-white/70 px-16 py-4 font-cormorant text-[34px] italic text-white/90"
+                >
+                  No
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="font-cormorant font-normal text-[88px] italic leading-tight">
+                Lovely.
+              </h1>
+              <p className="mt-4 font-cormorant font-light text-[40px] italic opacity-90">
+                Season{" "}
+                <span className="relative inline-block">
+                  <s className="absolute inset-x-0 bottom-full text-center leading-none opacity-60">
+                    two
+                  </s>
+                  three
+                </span>{" "}
+                begin.
+              </p>
+            </>
+          )}
         </div>
-      </div>
+      </Stage>
     );
   },
 );
