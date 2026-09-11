@@ -69,11 +69,20 @@ export const ProposalSection = forwardRef<ProposalSectionHandle>(
       () => {
         if (!accepted) return;
 
-        gsap.fromTo(
-          textRef.current,
-          { x: 1100, autoAlpha: 0 },
-          { x: 0, autoAlpha: 1, duration: 1, ease: "power3.out" },
-        );
+        const lines = textRef.current?.children;
+        if (!lines) return;
+
+        // Dua baris masuk dari kanan, ber-stagger, + sedikit "pop" skala.
+        // Ease bersih (expo.out) → punya karakter tanpa memantul.
+        gsap.from(lines, {
+          x: 760,
+          autoAlpha: 0,
+          scale: 0.9,
+          transformOrigin: "right center",
+          duration: 0.9,
+          ease: "expo.out",
+          stagger: 0.14,
+        });
       },
       { dependencies: [accepted], scope: root },
     );
