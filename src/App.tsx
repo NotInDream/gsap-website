@@ -76,11 +76,7 @@ function App() {
         .to({}, { duration: HOLD_MID })
         // Proposal naik menutupi Reasoning; Reasoning jatuh ke belakang.
         .addLabel("proposal")
-        .to(
-          proposalWrap.current,
-          { yPercent: 0, duration: COVER },
-          "proposal",
-        )
+        .to(proposalWrap.current, { yPercent: 0, duration: COVER }, "proposal")
         .to(
           reasoningScene.current,
           { scale: RECEDE_SCALE, duration: COVER },
@@ -94,28 +90,36 @@ function App() {
 
       // Isi Proposal (mawar+cincin & teks) muncul BARENGAN saat panel naik.
       const targets = proposalApi.current?.revealTargets();
+      // Foto meluncur masuk dari luar layar KIRI ke posisinya (scrub).
+      // yPercent: -50 menjaga centering vertikal (menggantikan -translate-y-1/2
+      // yang bisa hilang bila tinggi gambar belum ter-load saat GSAP mengukurnya).
       if (targets?.img) {
-        // yPercent: -50 menjaga centering vertikal (menggantikan -translate-y-1/2
-        // yang bisa hilang bila tinggi gambar belum ter-load saat GSAP mengukurnya).
         tl.fromTo(
           targets.img,
-          { xPercent: -14, yPercent: -50, autoAlpha: 0 },
+          { xPercent: -170, yPercent: -50, autoAlpha: 0 },
           {
             xPercent: 0,
             yPercent: -50,
             autoAlpha: 1,
             duration: COVER,
-            ease: "power2.out",
+            ease: "power8.out",
           },
           "proposal",
         );
       }
+      // Teks meluncur masuk dari luar layar KANAN ke posisinya (scrub).
       if (targets?.text) {
         tl.fromTo(
           targets.text,
-          { y: 48, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: COVER, ease: "power3.out" },
-          "proposal+=0.15",
+          { xPercent: 180, yPercent: -50, autoAlpha: 0 },
+          {
+            xPercent: 0,
+            yPercent: -50,
+            autoAlpha: 1,
+            duration: COVER,
+            ease: "power8.out",
+          },
+          "proposal",
         );
       }
     },
