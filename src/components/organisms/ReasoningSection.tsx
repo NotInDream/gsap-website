@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { Stage } from "../atoms/Stage";
 import background from "../../assets/backgrounds/background-2.jpg";
 import polaroid1 from "../../assets/foregrounds/section-2/polaroid-1.jpeg";
 import polaroid2 from "../../assets/foregrounds/section-2/polaroid-2.jpeg";
@@ -105,51 +106,43 @@ export const ReasoningSection = forwardRef<ReasoningSectionHandle>(
     );
 
     return (
-      <div
-        ref={root}
-        className="@container relative w-full aspect-1920/1080 overflow-hidden"
-      >
+      <Stage ref={root}>
         <div
-          className="absolute top-0 left-0 origin-top-left w-[1920px] h-270 overflow-hidden text-white"
-          style={{ transform: "scale(calc(100cqw / 1920))" }}
-        >
-          <div
-            ref={bgRef}
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${background})` }}
-          />
-          <div className="absolute inset-0 bg-black/50" />
+          ref={bgRef}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${background})` }}
+        />
+        <div className="absolute inset-0 bg-black/50" />
 
-          <PolaroidDeck
-            ref={deckRef}
-            items={photos}
-            className="absolute z-10 left-45 top-1/2 -translate-y-1/2"
-          />
+        <PolaroidDeck
+          ref={deckRef}
+          items={photos}
+          className="absolute z-10 left-45 top-1/2 -translate-y-1/2"
+        />
 
-          <div className="absolute z-10 w-257 h-62.25 right-10 top-100">
-            {/* Title (statis) — left-0 sebagai patokan tepi kiri. */}
-            <h1 className="absolute top-0 -left-4 font-cormorant font-normal text-[96px] italic">
-              Why I love you? <span className="text-[48px]">(again)</span>
-            </h1>
+        <div className="absolute z-10 w-257 h-62.25 right-10 top-100">
+          {/* Title (statis) — left-0 sebagai patokan tepi kiri. */}
+          <h1 className="absolute top-0 -left-4 font-cormorant font-normal text-[96px] italic">
+            Why I love you? <span className="text-[48px]">(again)</span>
+          </h1>
 
-            {/* Subtitle: 4 teks bertumpuk. left-0 SAMA dengan title → sejajar. */}
-            <div className="absolute left-4 top-32 w-full">
-              {reasons.map((r, i) => (
-                <h2
-                  key={i}
-                  ref={(el) => {
-                    subs.current[i] = el;
-                  }}
-                  className="absolute top-0 left-0 w-full font-cormorant font-light text-[40px] italic"
-                >
-                  {r.headline}
-                  <br />“{r.quote}”
-                </h2>
-              ))}
-            </div>
+          {/* Subtitle: 4 teks bertumpuk. left-0 SAMA dengan title → sejajar. */}
+          <div className="absolute left-4 top-32 w-full">
+            {reasons.map((r, i) => (
+              <h2
+                key={i}
+                ref={(el) => {
+                  subs.current[i] = el;
+                }}
+                className="absolute top-0 left-0 w-full font-cormorant font-light text-[40px] italic"
+              >
+                {r.headline}
+                <br />“{r.quote}”
+              </h2>
+            ))}
           </div>
         </div>
-      </div>
+      </Stage>
     );
   },
 );
